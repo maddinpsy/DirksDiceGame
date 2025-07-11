@@ -75,11 +75,11 @@ while running:
 
     if env.done:
         print("Game Over. Press ESC to exit.")
-    
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        
+
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             running = False
 
@@ -92,7 +92,7 @@ while running:
                 draw_board(env)
 
                 # Now AI plays
-                if not done and env.current_player == 2:
+                while not done and env.current_player == 2:
                     ai_action, _ = model.predict(obs)
                     obs, reward, done, _, _ = env.step(ai_action)
                     draw_board(env)
