@@ -27,15 +27,6 @@ class ChainReactionEnv(gym.Env):
         obs[2] = np.full((self.size, self.size), self.current_player / 2.0)
         return obs
     
-    def action_masks(self):
-        # Return a 1D np.array of booleans or 0/1s
-        # True or 1 for valid actions, False or 0 for invalid ones
-        mask = np.zeros(self.action_space.n, dtype=bool)
-        for a in range(self.action_space.n):
-            if self.is_valid_action(a):
-                mask[a] = True        
-        return mask
-    
     def is_valid_action(self, action):
         x, y = divmod(action, self.size)
 
@@ -49,12 +40,13 @@ class ChainReactionEnv(gym.Env):
         if self.done:
             raise Exception("Game over")
 
-        x, y = divmod(action, self.size)
-
         # Invalid move penalty
-        if self.owner[x, y] not in [0, self.current_player]:
-            return self._get_obs(), -1.0, False, False, {}
+        if not self.is_valid_action(action):
+            return self._get_obs(), -10.0, False, False, {}
 
+        player_cells_before = np.sum(self.owner == self.current_player)
+
+        x, y = divmod(action, self.size)
         self._apply_move(x, y)
 
         # Check end condition
@@ -63,11 +55,15 @@ class ChainReactionEnv(gym.Env):
 
         if opponent_cells == 0 and player_cells > 1:
             self.done = True
-            return self._get_obs(), 1.0, True, False, {}
+            return self._get_obs(), 10.0, True, False, {}
 
+        # get score
+        won_cells = player_cells - player_cells_before
+        reward = won_cells*1
+        
         # Swap player
         self.current_player = 3 - self.current_player  # 1 ↔ 2
-        return self._get_obs(), 0.0, False, False, {}
+        return self._get_obs(), reward, False, False, {}
 
     def _apply_move(self, x, y):
         self.board[x, y] += 1

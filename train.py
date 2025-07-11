@@ -1,8 +1,8 @@
 from stable_baselines3 import PPO
-from sb3_contrib.ppo_mask import MaskablePPO
 from chain_reaction_env import ChainReactionEnv  # Import the class from earlier
 from stable_baselines3.common.env_util import make_vec_env
 from small_cnn import SmallCNN
+from gymnasium.wrappers import TimeLimit
     
 policy_kwargs = dict(
     features_extractor_class=SmallCNN,
@@ -11,10 +11,15 @@ policy_kwargs = dict(
 
 
 # Create environment
-env = make_vec_env(lambda: ChainReactionEnv(size=6), n_envs=8)
+env = make_vec_env(
+    lambda: TimeLimit(ChainReactionEnv(size=6), max_episode_steps=20),
+    n_envs=8
+)
 
 # Train PPO
-model = MaskablePPO("CnnPolicy", env, policy_kwargs=policy_kwargs,  verbose=1, tensorboard_log="./tensorboard_logs/")
+# model = PPO.load("ppo_chainreaction", env=env)
+model = PPO("MlpPolicy", env,  verbose=1, tensorboard_log="./tensorboard_logs/")
+# model = PPO("CnnPolicy", env, policy_kwargs=policy_kwargs,  verbose=1, tensorboard_log="./tensorboard_logs/")
 model.learn(total_timesteps=500_000)
 
 # Save
