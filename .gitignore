@@ -1,3 +1,4 @@
 .venv
 __pycache__
 ppo_chainreaction*
+tensorboard_logs

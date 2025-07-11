@@ -4,3 +4,4 @@ numpy==2.3.1
 stable_baselines3==2.6.0
 gymnasium
 sb3_contrib==2.6.0
+tensorboard==2.19.0
